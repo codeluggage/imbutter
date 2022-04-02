@@ -1,101 +1,95 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
+import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
-import 'sample_feature/sample_item_details_view.dart';
-import 'sample_feature/sample_item_list_view.dart';
-import 'settings/settings_controller.dart';
-import 'settings/settings_view.dart';
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
-// import 'package:shelf_router/shelf_router.dart';
-// import 'package:shelf/shelf.dart';
-// import 'package:shelf/shelf_io.dart' as io;
+  runApp(const MyApp());
+}
 
-// var app = Router();
-
-// app.get('/hello', (Request request) {
-//   return Response.ok('hello-world');
-// });
-
-// app.get('/user/<user>', (Request request, String user) {
-//   return Response.ok('hello $user');
-// });
-
-// var server = await io.serve(app, 'localhost', 8080);
-
-/// The Widget that configures your application.
 class MyApp extends StatelessWidget {
-  const MyApp({
-    Key? key,
-    required this.settingsController,
-  }) : super(key: key);
+  static const String title = 'WebView';
 
-  final SettingsController settingsController;
+  const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    // Glue the SettingsController to the MaterialApp.
-    //
-    // The AnimatedBuilder Widget listens to the SettingsController for changes.
-    // Whenever the user updates their settings, the MaterialApp is rebuilt.
-    return AnimatedBuilder(
-      animation: settingsController,
-      builder: (BuildContext context, Widget? child) {
-        return MaterialApp(
-          // Providing a restorationScopeId allows the Navigator built by the
-          // MaterialApp to restore the navigation stack when a user leaves and
-          // returns to the app after it has been killed while running in the
-          // background.
-          restorationScopeId: 'app',
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: title,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: MainPage(),
+      );
+}
 
-          // Provide the generated AppLocalizations to the MaterialApp. This
-          // allows descendant Widgets to display the correct translations
-          // depending on the user's locale.
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en', ''), // English, no country code
-          ],
+class MainPage extends StatefulWidget {
+  const MainPage({Key? key}) : super(key: key);
 
-          // Use AppLocalizations to configure the correct application title
-          // depending on the user's locale.
-          //
-          // The appTitle is defined in .arb files found in the localization
-          // directory.
-          onGenerateTitle: (BuildContext context) =>
-              AppLocalizations.of(context)!.appTitle,
+  @override
+  _MainPageState createState() => _MainPageState();
+}
 
-          // Define a light and dark color theme. Then, read the user's
-          // preferred ThemeMode (light, dark, or system default) from the
-          // SettingsController to display the correct theme.
-          theme: ThemeData(),
-          darkTheme: ThemeData.dark(),
-          themeMode: settingsController.themeMode,
+class _MainPageState extends State<MainPage> {
+  late WebViewPlusController controller;
 
-          // Define a function to handle named routes in order to support
-          // Flutter web url navigation and deep linking.
-          onGenerateRoute: (RouteSettings routeSettings) {
-            return MaterialPageRoute<void>(
-              settings: routeSettings,
-              builder: (BuildContext context) {
-                switch (routeSettings.name) {
-                  case SettingsView.routeName:
-                    return SettingsView(controller: settingsController);
-                  case SampleItemDetailsView.routeName:
-                    return const SampleItemDetailsView();
-                  case SampleItemListView.routeName:
-                  default:
-                    return const SampleItemListView();
-                }
-              },
-            );
+  // void loadLocalHtml() async {
+  //   final html = await rootBundle.loadString('assets/index.html');
+
+  //   final url = Uri.dataFromString(
+  //     html,
+  //     mimeType: 'text/html',
+  //     encoding: Encoding.getByName('utf-8'),
+  //   ).toString();
+
+  //   controller.loadUrl(url);
+  // }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: const Text(MyApp.title),
+        ),
+        body: WebViewPlus(
+          javascriptMode: JavascriptMode.unrestricted,
+          initialUrl: 'assets/index.html',
+          onWebViewCreated: (controller) {
+            this.controller = controller;
+
+            // loadLocalHtml();
           },
-        );
-      },
-    );
-  }
+          javascriptChannels: {
+            JavascriptChannel(
+              name: 'JavascriptChannel',
+              onMessageReceived: (message) async {
+                debugPrint('Javascript: "${message.message}"');
+                await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    content: Text(
+                      message.message,
+                      style: const TextStyle(fontSize: 20),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: const Text('OK'),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                );
+
+                controller.webViewController
+                    .runJavascriptReturningResult('ok()')
+                    .then((value) => debugPrint(value));
+              },
+            ),
+          },
+        ),
+      );
 }

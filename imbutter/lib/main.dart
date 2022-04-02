@@ -25,7 +25,7 @@ void main() async {
   // // Enable content compression
   // server.autoCompress = true;
 
-  // print('Serving at http://${server.address.host}:${server.port}');
+  // debugPrint('Serving at http://${server.address.host}:${server.port}');
 
   var app = shelf_router.Router();
 
@@ -39,14 +39,15 @@ void main() async {
 
   var _port = 8080;
   var server = await io.serve(app, 'localhost', _port);
+  debugPrint(server.toString());
 
   final res = await http.get(Uri.http('localhost:$_port', '/'));
-  print(res);
-  print(res.body);
+  debugPrint(res.toString());
+  debugPrint(res.body);
 
   final hello = await http.get(Uri.http('localhost:$_port', '/hello'));
-  print(hello);
-  print(hello.body);
+  debugPrint(hello.toString());
+  debugPrint(hello.body);
 
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
@@ -59,5 +60,6 @@ void main() async {
   // Run the app and pass in the SettingsController. The app listens to the
   // SettingsController for changes, then passes it further down to the
   // SettingsView.
-  runApp(MyApp(settingsController: settingsController));
+  // runApp(MyApp(settingsController: settingsController));
+  runApp(const MyApp());
 }
