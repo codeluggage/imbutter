@@ -118,10 +118,11 @@ Middleware handleCors() {
   };
 
   return createMiddleware(requestHandler: (Request request) {
-    if (request.method.toLowerCase() == 'options') {
-      return Response.ok('', headers: corsHeaders);
-    }
-    return null;
+    // if (request.method.toLowerCase() == 'options') {
+    //   return Response.ok('', headers: corsHeaders);
+    // }
+    // return null;
+    return Response.ok('', headers: corsHeaders);
   }, responseHandler: (Response response) {
     return response.change(headers: corsHeaders);
   });
@@ -246,19 +247,19 @@ class _MainPageState extends State<MainPage> {
             debugPrint('onPageFinished: $url');
             controller.webViewController.runJavascript("""
     fetch(new Request(
-        'http://localhost:8080/hello-html'
+        'http://10.0.2.2:8080/hello-html'
     )).then(function (response) {
-        h1.textContent = JSON.stringify(response)
+        // h1.textContent = JSON.stringify(response)
         response.text().then((text) => {
             coloredDiv.setAttribute('style', 'background:green;')
-            h2.textContent = text
+            // h2.textContent = text
         }).catch(error => {
             coloredDiv.setAttribute('style', 'background:purple;')
-            h3.textContent = error
+            // h3.textContent = error
         });
       }).catch(function(error) {
         coloredDiv.setAttribute('style', 'background:red;')
-        h4.textContent = error
+        // h4.textContent = error
     })
 """);
           },

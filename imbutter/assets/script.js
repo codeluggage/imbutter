@@ -22,7 +22,7 @@ function submit() {
 
 
     fetch(new Request(
-        'http://localhost:8080/hello-html',
+        'http://localhost:8080/hello-text',
 
         // {
         //     // method: 'POST',
@@ -84,7 +84,7 @@ function submit() {
         // JavascriptChannel.postMessage(`${error}`);
     })
 
-    h4.textContent = `${hold}`
+    // h4.textContent = `${hold}`
 
     // fetch({
     //     method: 'GET',
