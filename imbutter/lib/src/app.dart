@@ -68,21 +68,22 @@ class _MainPageState extends State<MainPage> {
               name: 'JavascriptChannel',
               onMessageReceived: (message) async {
                 debugPrint('Javascript: "${message.message}"');
-                await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    content: Text(
-                      message.message,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: const Text('OK'),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                );
+
+                // await showDialog(
+                //   context: context,
+                //   builder: (context) => AlertDialog(
+                //     content: Text(
+                //       message.message,
+                //       style: const TextStyle(fontSize: 20),
+                //     ),
+                //     actions: [
+                //       TextButton(
+                //         child: const Text('OK'),
+                //         onPressed: () => Navigator.pop(context),
+                //       ),
+                //     ],
+                //   ),
+                // );
 
                 controller.webViewController
                     .runJavascriptReturningResult('ok()')

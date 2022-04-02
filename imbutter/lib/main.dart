@@ -1,31 +1,19 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-
-import 'src/app.dart';
-import 'src/settings/settings_controller.dart';
-import 'src/settings/settings_service.dart';
-
-// import 'package:shelf/shelf.dart';
-// import 'package:shelf/shelf_io.dart' as shelf_io;
-
-// Response _echoRequest(Request request) =>
-//     Response.ok('Request for "${request.url}"');
+import 'package:flutter/services.dart';
+import 'package:webview_flutter_plus/webview_flutter_plus.dart';
 
 import 'package:shelf_router/shelf_router.dart' as shelf_router;
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
-
 import 'package:http/http.dart' as http;
 
-void main() async {
-  // var handler =
-  //     const Pipeline().addMiddleware(logRequests()).addHandler(_echoRequest);
-
-  // var server = await shelf_io.serve(handler, 'localhost', 8080);
-
-  // // Enable content compression
-  // server.autoCompress = true;
-
-  // debugPrint('Serving at http://${server.address.host}:${server.port}');
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   var app = shelf_router.Router();
 
@@ -49,17 +37,79 @@ void main() async {
   debugPrint(hello.toString());
   debugPrint(hello.body);
 
-  // Set up the SettingsController, which will glue user settings to multiple
-  // Flutter Widgets.
-  final settingsController = SettingsController(SettingsService());
+  runApp(MyApp());
+}
 
-  // Load the user's preferred theme while the splash screen is displayed.
-  // This prevents a sudden theme change when the app is first displayed.
-  await settingsController.loadSettings();
+class MyApp extends StatelessWidget {
+  static final String title = 'WebView';
 
-  // Run the app and pass in the SettingsController. The app listens to the
-  // SettingsController for changes, then passes it further down to the
-  // SettingsView.
-  // runApp(MyApp(settingsController: settingsController));
-  runApp(const MyApp());
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: title,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: MainPage(),
+      );
+}
+
+class MainPage extends StatefulWidget {
+  @override
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  late WebViewPlusController controller;
+
+  // void loadLocalHtml() async {
+  //   final html = await rootBundle.loadString('assets/index.html');
+
+  //   final url = Uri.dataFromString(
+  //     html,
+  //     mimeType: 'text/html',
+  //     encoding: Encoding.getByName('utf-8'),
+  //   ).toString();
+
+  //   controller.loadUrl(url);
+  // }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text(MyApp.title),
+        ),
+        body: WebViewPlus(
+          javascriptMode: JavascriptMode.unrestricted,
+          initialUrl: 'assets/index.html',
+          onWebViewCreated: (controller) {
+            this.controller = controller;
+
+            // loadLocalHtml();
+          },
+          javascriptChannels: {
+            JavascriptChannel(
+              name: 'JavascriptChannel',
+              onMessageReceived: (message) async {
+                print('Javascript: "${message.message}"');
+                await showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    content: Text(
+                      message.message,
+                      style: TextStyle(fontSize: 20),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text('OK'),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                );
+
+                controller.webViewController.evaluateJavascript('ok()');
+              },
+            ),
+          },
+        ),
+      );
 }
