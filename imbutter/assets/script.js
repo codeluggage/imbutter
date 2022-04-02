@@ -9,11 +9,14 @@ function submit() {
 
     // JavascriptChannel.postMessage({ test: 'hello world' })
     // const hold = fetch({
-    //     // method: 'GET',
-    //     url: 'localhost:8080/api/v1/hello',
+    //     // method: 'POST',
+    //     body: JSON.stringify({ 'from': 'imbutter', }),
+    //     url: 'http://localhost',
     //     headers: {
     //         'Content-Type': 'application/json',
+    //         // 'Content-Type': 'text/html',
     //     },
+        
     // // url: 'localhost:8080/hello'
     // }).then(response => {
     fetch('http://localhost:8080/hello').then(response => {

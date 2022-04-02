@@ -9,6 +9,10 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:http/http.dart' as http;
 
+Response _echoRequest(Request request) {
+  return Response.ok('Request for "${request.url}"');
+}
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SystemChrome.setPreferredOrientations([
@@ -16,32 +20,42 @@ Future main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  var app = shelf_router.Router();
+  var handler =
+      const Pipeline().addMiddleware(logRequests()).addHandler(_echoRequest);
 
-  // app.get('/api/v1/hello', (Request request) {
-  app.get('/hello', (Request request) {
-    return Response.ok(
-      'hello-world-from-flutter',
-      headers: {'content-type': 'text/plain'},
-      encoding: Encoding.getByName('utf-8'),
-      context: request.context,
-    );
-    // return Response.ok('hello world');
-    // request.change(headers: {
-    //   'Content-Type': 'application/json',
-    // });
+  var server = await io.serve(handler, 'localhost', 8080);
 
-    // return Response.ok({'payload': 'hello-world'});
-  });
+  // Enable content compression
+  // server.autoCompress = true;
 
-  app.get('/user/<user>', (Request request, String user) {
-    // app.get('/api/v1/user/<user>', (Request request, String user) {
-    return Response.ok('hello $user');
-  });
+  debugPrint('Serving at http://${server.address.host}:${server.port}');
 
-  var _port = 8080;
-  var server = await io.serve(app, 'localhost', _port);
-  debugPrint(server.toString());
+  // var app = shelf_router.Router();
+
+  // // app.get('/api/v1/hello', (Request request) {
+  // app.get('/hello', (Request request) {
+  //   return Response.ok(
+  //     'hello-world-from-flutter',
+  //     headers: {'content-type': 'text/plain'},
+  //     encoding: Encoding.getByName('utf-8'),
+  //     context: request.context,
+  //   );
+  //   // return Response.ok('hello world');
+  //   // request.change(headers: {
+  //   //   'Content-Type': 'application/json',
+  //   // });
+
+  //   // return Response.ok({'payload': 'hello-world'});
+  // });
+
+  // app.get('/user/<user>', (Request request, String user) {
+  //   // app.get('/api/v1/user/<user>', (Request request, String user) {
+  //   return Response.ok('hello $user');
+  // });
+
+  // var _port = 8080;
+  // var server = await io.serve(app, 'localhost', _port);
+  // debugPrint(server.toString());
 
   // final res = await http.get(Uri.http('localhost:$_port', '/'));
   // debugPrint(res.toString());
@@ -93,6 +107,10 @@ class _MainPageState extends State<MainPage> {
         ),
         body: WebViewPlus(
           javascriptMode: JavascriptMode.unrestricted,
+          onWebResourceError: (error) {
+            debugPrint(error.toString());
+          },
+          // serverPort: _port,
           initialUrl: 'assets/index.html',
           navigationDelegate: (NavigationRequest request) {
             debugPrint(request.toString());
