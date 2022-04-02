@@ -89,24 +89,15 @@ class _MainPageState extends State<MainPage> {
             JavascriptChannel(
               name: 'JavascriptChannel',
               onMessageReceived: (message) async {
-                print('Javascript: "${message.message}"');
-                await showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    content: Text(
-                      message.message,
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text('OK'),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ],
-                  ),
-                );
+                debugPrint('Javascript: "${message.message}"');
 
-                controller.webViewController.evaluateJavascript('ok()');
+                // controller.webViewController.runJavascript('ok()');
+
+                // controller.webViewController
+                //     .runJavascriptReturningResult('ok()')
+                //     .then((value) {
+                //   debugPrint('Javascript: "$value"');
+                // });
               },
             ),
           },
