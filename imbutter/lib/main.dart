@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter_plus/webview_flutter_plus.dart';
@@ -17,11 +18,24 @@ Future main() async {
 
   var app = shelf_router.Router();
 
+  // app.get('/api/v1/hello', (Request request) {
   app.get('/hello', (Request request) {
-    return Response.ok('hello-world');
+    return Response.ok(
+      'hello-world-from-flutter',
+      headers: {'content-type': 'text/plain'},
+      encoding: Encoding.getByName('utf-8'),
+      context: request.context,
+    );
+    // return Response.ok('hello world');
+    // request.change(headers: {
+    //   'Content-Type': 'application/json',
+    // });
+
+    // return Response.ok({'payload': 'hello-world'});
   });
 
   app.get('/user/<user>', (Request request, String user) {
+    // app.get('/api/v1/user/<user>', (Request request, String user) {
     return Response.ok('hello $user');
   });
 
@@ -29,13 +43,13 @@ Future main() async {
   var server = await io.serve(app, 'localhost', _port);
   debugPrint(server.toString());
 
-  final res = await http.get(Uri.http('localhost:$_port', '/'));
-  debugPrint(res.toString());
-  debugPrint(res.body);
+  // final res = await http.get(Uri.http('localhost:$_port', '/'));
+  // debugPrint(res.toString());
+  // debugPrint(res.body);
 
-  final hello = await http.get(Uri.http('localhost:$_port', '/hello'));
-  debugPrint(hello.toString());
-  debugPrint(hello.body);
+  // final hello = await http.get(Uri.http('localhost:$_port', '/hello'));
+  // debugPrint(hello.toString());
+  // debugPrint(hello.body);
 
   runApp(MyApp());
 }
@@ -80,9 +94,12 @@ class _MainPageState extends State<MainPage> {
         body: WebViewPlus(
           javascriptMode: JavascriptMode.unrestricted,
           initialUrl: 'assets/index.html',
+          navigationDelegate: (NavigationRequest request) {
+            debugPrint(request.toString());
+            return NavigationDecision.navigate;
+          },
           onWebViewCreated: (controller) {
             this.controller = controller;
-
             // loadLocalHtml();
           },
           javascriptChannels: {

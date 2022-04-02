@@ -6,25 +6,28 @@ function submit() {
     var h4 = document.getElementById("heading4");
 
     coloredDiv.setAttribute('style', 'background:blue;')
-    // JavascriptChannel.postMessage({ test: 'hello world' })
 
-    fetch({
-        method: 'GET',
-        url: 'http://localhost',
-        // url: 'localhost:8080/hello'
-    }).then(response => { 
-    // fetch('localhost:8080/').then(response => { 
+    // JavascriptChannel.postMessage({ test: 'hello world' })
+    // const hold = fetch({
+    //     // method: 'GET',
+    //     url: 'localhost:8080/api/v1/hello',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //     },
+    // // url: 'localhost:8080/hello'
+    // }).then(response => {
+    fetch('http://localhost:8080/hello').then(response => {
         h1.textContent = JSON.stringify(response)
         // JavascriptChannel.postMessage(`${response}`)
 
         response.text().then((text) => {
             coloredDiv.setAttribute('style', 'background:green;')
             h2.textContent = text
-            JavascriptChannel.postMessage(text)
+            // JavascriptChannel.postMessage(text)
         }).catch(error => {
             coloredDiv.setAttribute('style', 'background:purple;')
             h3.textContent = error
-            JavascriptChannel.postMessage(`${error}`);
+            // JavascriptChannel.postMessage(`${error}`);
         });
 
         // response.json().then((json) => {
@@ -40,9 +43,11 @@ function submit() {
         // JavascriptChannel.postMessage(`${response.body}`);
     }).catch(error => {
         coloredDiv.setAttribute('style', 'background:red;')
-        // h4.textContent = error
-        JavascriptChannel.postMessage(`${error}`);
+        h4.textContent = error
+        // JavascriptChannel.postMessage(`${error}`);
     })
+
+    h4.textContent = `${hold}`
 
     // fetch({
     //     method: 'GET',
