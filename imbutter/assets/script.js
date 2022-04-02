@@ -19,7 +19,38 @@ function submit() {
         
     // // url: 'localhost:8080/hello'
     // }).then(response => {
-    fetch('http://localhost:8080/hello').then(response => {
+
+
+    fetch(new Request(
+        'http://localhost:8080/hello-html',
+
+        // {
+        //     // method: 'POST',
+        //     // body: JSON.stringify({ 'from': 'imbutter', }),
+        //     headers: {
+        //         // 'Content-Type': 'application/json',
+        //         'Content-Type': 'text/html',
+        //         // 'Content-Type': 'text/plain',
+        //     },
+        // }
+
+
+        // url: 'https://localhost:8080/hello',
+        // method: 'GET',
+        // destination: "object",
+        // headers: {
+        //     'Content-Type': 'application/json',
+        //     // 'Content-Type': 'text/html',
+        // },
+
+    )).then(function (response) {
+    //         console.log("fetch success");
+    //     }).catch(function(error) {
+    //         console.log("fetch error");
+    //     });
+
+
+    // fetch('http://localhost:8080/hello').then(response => {
         h1.textContent = JSON.stringify(response)
         // JavascriptChannel.postMessage(`${response}`)
 
@@ -44,7 +75,10 @@ function submit() {
         // })
 
         // JavascriptChannel.postMessage(`${response.body}`);
-    }).catch(error => {
+        }).catch(function(error) {
+    //         console.log("fetch error");
+    //     });
+    // }).catch(error => {
         coloredDiv.setAttribute('style', 'background:red;')
         h4.textContent = error
         // JavascriptChannel.postMessage(`${error}`);
