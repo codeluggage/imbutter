@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
@@ -38,50 +37,27 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final GlobalKey webViewKey = GlobalKey();
-
-  InAppWebViewController? webViewController;
-
   InAppWebViewGroupOptions options = InAppWebViewGroupOptions(
-      crossPlatform: InAppWebViewOptions(
-        useShouldOverrideUrlLoading: true,
-        mediaPlaybackRequiresUserGesture: false,
-        allowUniversalAccessFromFileURLs: true,
-      ),
-      android: AndroidInAppWebViewOptions(
-        useHybridComposition: true,
-      ),
-      ios: IOSInAppWebViewOptions(
-        allowsInlineMediaPlayback: true,
-      ));
+    crossPlatform: InAppWebViewOptions(
+      allowUniversalAccessFromFileURLs: true,
+    ),
+    android: AndroidInAppWebViewOptions(
+      useHybridComposition: true,
+    ),
+  );
 
-  late PullToRefreshController pullToRefreshController;
-  String url = "";
   double progress = 0;
-  final urlController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    pullToRefreshController = PullToRefreshController(
-      options: PullToRefreshOptions(
-        color: Colors.blue,
-      ),
-      onRefresh: () async {
-        if (Platform.isAndroid) {
-          webViewController?.reload();
-        } else if (Platform.isIOS) {
-          webViewController?.loadUrl(
-              urlRequest: URLRequest(url: await webViewController?.getUrl()));
-        }
-      },
-    );
-  }
+  InAppWebViewController? webViewController;
+  final GlobalKey webViewKey = GlobalKey();
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -95,80 +71,30 @@ class _MyAppState extends State<MyApp> {
             key: webViewKey,
             initialFile: 'assets/index.html',
             initialOptions: options,
-            pullToRefreshController: pullToRefreshController,
             onWebViewCreated: (controller) {
               webViewController = controller;
             },
             onLoadStart: (controller, url) {
               debugPrint('onLoadStart: $url');
-
-              setState(() {
-                this.url = url.toString();
-                urlController.text = this.url;
-              });
             },
             androidOnPermissionRequest: (controller, origin, resources) async {
               return PermissionRequestResponse(
                   resources: resources,
                   action: PermissionRequestResponseAction.GRANT);
             },
-            shouldOverrideUrlLoading: (controller, navigationAction) async {
-              final uri = navigationAction.request.url!;
-
-              debugPrint(
-                  "shouldOverrideUrlLoading navigateAction: $navigationAction for $uri");
-
-              if (![
-                "http",
-                "https",
-                "file",
-                "chrome",
-                "data",
-                "javascript",
-                "about"
-              ].contains(uri.scheme)) {
-                if (await canLaunch(url)) {
-                  // Launch the App
-                  await launch(
-                    url,
-                  );
-                  // and cancel the request
-                  return NavigationActionPolicy.CANCEL;
-                }
-              }
-
-              return NavigationActionPolicy.ALLOW;
-            },
             onLoadStop: (controller, url) async {
               debugPrint('onLoadStop: $url');
-
-              pullToRefreshController.endRefreshing();
-              setState(() {
-                this.url = url.toString();
-                urlController.text = this.url;
-              });
             },
             onLoadError: (controller, url, code, message) {
               debugPrint("onLoadError, got $code with $message for $url");
-
-              pullToRefreshController.endRefreshing();
             },
             onProgressChanged: (controller, progress) {
-              if (progress == 100) {
-                pullToRefreshController.endRefreshing();
-              }
               setState(() {
                 this.progress = progress / 100;
-                urlController.text = url;
               });
             },
             onUpdateVisitedHistory: (controller, url, androidIsReload) {
               debugPrint("onUpdateVisitedHistory url: $url");
-
-              setState(() {
-                this.url = url.toString();
-                urlController.text = this.url;
-              });
             },
             onConsoleMessage: (controller, consoleMessage) {
               debugPrint(consoleMessage.toString());
