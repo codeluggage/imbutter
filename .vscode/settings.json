@@ -4,7 +4,7 @@
     "dart.allowTestsOutsideTestFolder": true,
     // "workbench.colorTheme": "One Dark Theme",
     "editor.fontFamily": "Fira Code",
-    "editor.fontSize": 17,
+    "editor.fontSize": 15,
     "editor.guides.highlightActiveIndentation": false,
     // "editor.guides.indentation": false,
     // "editor.guides.highlightActiveBracketPair": false,
