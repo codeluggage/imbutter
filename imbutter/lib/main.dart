@@ -1,13 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
-
-Response _echoRequest(Request request) =>
-    Response.ok('Request for "${request.url}"');
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,17 +14,33 @@ Future main() async {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
 
+  const app = MyApp();
+  late HttpServer server;
+
+  Response _echoRequest(Request request) {
+    // if (request.url.pathSegments.last == 'hello-text') {
+    //   debugPrint("closing server in response to web logic");
+    //   server.close();
+    // }
+
+    return Response.ok(jsonEncode({
+      'url': request.url.toString(),
+      'method': request.method,
+      'headers': request.headers.toString(),
+    }));
+  }
+
   var handler =
       const Pipeline().addMiddleware(logRequests()).addHandler(_echoRequest);
 
-  var server = await shelf_io.serve(handler, 'localhost', 8080);
+  server = await shelf_io.serve(handler, 'localhost', 8080);
 
   // Enable content compression
   server.autoCompress = true;
 
-  print('Serving at http://${server.address.host}:${server.port}');
+  debugPrint('Serving at http://${server.address.host}:${server.port}');
 
-  runApp(const MyApp());
+  runApp(app);
 }
 
 class MyApp extends StatefulWidget {
