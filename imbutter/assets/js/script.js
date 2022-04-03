@@ -11,13 +11,31 @@ const submit = async () => {
   coloredDiv.setAttribute('style', 'background:blue;')
 
   try {
-    const res = await fetch('http://localhost:8080/hello-text')
+    // const res = await fetch('http://localhost:8080/hello')
+
+    // const res = await fetch('http://localhost:8080/play', {
+    //   method: 'POST',
+    //   //   headers: {
+    //   //     'Content-Type': 'application/json'
+    //   //   },
+    //   //   body: JSON.stringify({ id: 'song-id-here' })
+    //   body: 'song-id-here'
+    // })
+
+    const res = await fetch('http://localhost:8080/play', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: 'song-id-here' })
+      //   body: 'song-id-here'
+    })
+
     console.log(res)
 
     if (!res.ok) {
       console.log('!res.ok')
       coloredDiv.setAttribute('style', 'background:red;')
-      h4.textContent = error
       return
     }
 

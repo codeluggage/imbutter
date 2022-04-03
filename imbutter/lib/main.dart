@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:shelf/shelf.dart';
-import 'package:shelf/shelf_io.dart' as shelf_io;
+import 'package:shelf_router/shelf_router.dart' as router;
+import 'package:shelf/shelf_io.dart' as io;
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,33 +15,47 @@ Future main() async {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
 
-  const app = MyApp();
-  late HttpServer server;
+  // Response _echoRequest(Request request) {
+  //   return Response.ok(jsonEncode({
+  //     'url': request.url.toString(),
+  //     'method': request.method,
+  //     'headers': request.headers.toString(),
+  //   }));
+  // }
 
-  Response _echoRequest(Request request) {
-    // if (request.url.pathSegments.last == 'hello-text') {
-    //   debugPrint("closing server in response to web logic");
-    //   server.close();
-    // }
+  // final handler =
+  //     const Pipeline().addMiddleware(logRequests()).addHandler(_echoRequest);
 
-    return Response.ok(jsonEncode({
-      'url': request.url.toString(),
-      'method': request.method,
-      'headers': request.headers.toString(),
-    }));
-  }
+  // final server = await io.serve(handler, 'localhost', 8080);
 
-  var handler =
-      const Pipeline().addMiddleware(logRequests()).addHandler(_echoRequest);
+  // server.autoCompress = true;
 
-  server = await shelf_io.serve(handler, 'localhost', 8080);
+  var app = router.Router();
 
-  // Enable content compression
+  app.get('/hello', (Request request) {
+    return Response.ok('hello-world');
+    // return Response.ok(jsonEncode({
+    //   'url': request.url.toString(),
+    //   'method': request.method,
+    //   'headers': request.headers.toString(),
+    // }));
+  });
+
+  app.get('/user/<user>', (Request request, String user) {
+    return Response.ok('hello $user');
+  });
+
+  app.post('/play', (Request request) async {
+    final stringBody = await request.readAsString();
+    final body = jsonDecode(stringBody);
+
+    return Response.ok('would play $body');
+  });
+
+  final server = await io.serve(app, 'localhost', 8080);
   server.autoCompress = true;
 
-  debugPrint('Serving at http://${server.address.host}:${server.port}');
-
-  runApp(app);
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -54,6 +69,8 @@ class _MyAppState extends State<MyApp> {
   InAppWebViewGroupOptions options = InAppWebViewGroupOptions(
     crossPlatform: InAppWebViewOptions(
       allowUniversalAccessFromFileURLs: true,
+      allowFileAccessFromFileURLs: true,
+      disableContextMenu: true,
     ),
     android: AndroidInAppWebViewOptions(
       useHybridComposition: true,
