@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart' as router;
 import 'package:shelf/shelf_io.dart' as io;
+
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:just_audio/just_audio.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +36,13 @@ Future main() async {
   // server.autoCompress = true;
 
   var app = router.Router();
+  final player = AudioPlayer();
+
+  const fileName = 'fortune.mp3';
+  final content = await rootBundle.load("assets/audio/$fileName");
+  final directory = await getApplicationDocumentsDirectory();
+  final file = File("${directory.path}/$fileName");
+  file.writeAsBytesSync(content.buffer.asUint8List());
 
   app.get('/hello', (Request request) {
     return Response.ok('hello-world');
@@ -48,8 +60,12 @@ Future main() async {
   app.post('/play', (Request request) async {
     final stringBody = await request.readAsString();
     final body = jsonDecode(stringBody);
+    if (kDebugMode) print(body);
 
-    return Response.ok('would play $body');
+    await player.setFilePath(file.path);
+    await player.play();
+
+    return Response.ok('done playing ${file.path}');
   });
 
   final server = await io.serve(app, 'localhost', 8080);
@@ -82,13 +98,13 @@ class _MyAppState extends State<MyApp> {
   final GlobalKey webViewKey = GlobalKey();
 
   @override
-  void dispose() {
-    super.dispose();
+  void initState() {
+    super.initState();
   }
 
   @override
-  void initState() {
-    super.initState();
+  void dispose() {
+    super.dispose();
   }
 
   @override
