@@ -31,7 +31,7 @@ flutter:
   generate: true
 
   assets:
-    - assets/index.html
-    - assets/js/
-    - assets/css/
+    - assets/imbutter/html/
+    - assets/imbutter/public/
+    - assets/imbutter/app/
     - assets/audio/

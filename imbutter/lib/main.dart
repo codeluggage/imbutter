@@ -57,7 +57,9 @@ Future main() async {
     return Response.ok('hello $user');
   });
 
-  app.post('/play', (Request request) async {
+  const audioPath = 'just_audio';
+
+  app.post('/$audioPath/play', (Request request) async {
     final stringBody = await request.readAsString();
     final body = jsonDecode(stringBody);
     if (kDebugMode) print(body);
@@ -116,7 +118,7 @@ class _MyAppState extends State<MyApp> {
           //     ? LinearProgressIndicator(value: progress)
           child: InAppWebView(
             key: webViewKey,
-            initialFile: 'assets/index.html',
+            initialFile: 'assets/imbutter/html/index.html',
             initialOptions: options,
             onWebViewCreated: (controller) {
               webViewController = controller;
